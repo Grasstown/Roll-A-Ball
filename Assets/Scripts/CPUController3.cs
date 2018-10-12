@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class CPUController3 : MonoBehaviour
 {
 
-    //Method 2 - Use Dijkstra's Algorithm to 
+    //Method 3 - Use Dijkstra's Algorithm to map where pickups are and move to closest pickup
 
     private float speed;
     public Text countText;
@@ -23,7 +23,8 @@ public class CPUController3 : MonoBehaviour
 
     void Update()
     {
-        speed = 5;
+        speed = 1f;
+        MapPickups();
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -47,5 +48,22 @@ public class CPUController3 : MonoBehaviour
     public int GetCount()
     {
         return count;
+    }
+
+    void MapPickups()
+    {
+        Vector3 position = transform.position;
+
+        List<GameObject> pickups = new List<GameObject>((GameObject[])GameObject.FindGameObjectsWithTag("Pick-Up"));
+        float distance = Mathf.Infinity;
+        GameObject closestPickup = null;
+        List<GameObject> unvisitedPickups = pickups;
+        foreach (GameObject pickup in unvisitedPickups)
+        {
+            if (Vector3.Distance(position, pickup.transform.position) < distance)
+            {
+                closestPickup = pickup;
+            }
+        }
     }
 }
