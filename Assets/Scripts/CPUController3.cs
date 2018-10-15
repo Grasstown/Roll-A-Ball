@@ -19,12 +19,13 @@ public class CPUController3 : MonoBehaviour
         count = 0;
 
         SetCountText();
+        MapShortestPickupPath();
     }
 
     void Update()
     {
         speed = 1f;
-        MapPickups();
+        //MapShortestPickupPath();
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -50,20 +51,56 @@ public class CPUController3 : MonoBehaviour
         return count;
     }
 
-    void MapPickups()
+    void MapShortestPickupPath()
     {
-        Vector3 position = transform.position;
-
+        /*
         List<GameObject> pickups = new List<GameObject>((GameObject[])GameObject.FindGameObjectsWithTag("Pick-Up"));
         float distance = Mathf.Infinity;
+        float totalDistance = 0;
         GameObject closestPickup = null;
         List<GameObject> unvisitedPickups = pickups;
+
+        List<Vector3> visitedPickups = new List<Vector3>();
+        visitedPickups.Add(transform.position);
         foreach (GameObject pickup in unvisitedPickups)
         {
-            if (Vector3.Distance(position, pickup.transform.position) < distance)
+            if (Vector3.Distance(transform.position, pickup.transform.position) < distance)
             {
                 closestPickup = pickup;
+                distance = Vector3.Distance(transform.position, closestPickup.transform.position);
+                totalDistance += distance;
+                visitedPickups.Add(closestPickup.transform.position);
             }
+        }
+        */
+
+        //Mark all nodes unvisited + create unvisited set
+        GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pick-Up");
+        Vector3[] pickupPositions = new Vector3[pickups.Length];
+        for (int i = 0; i < pickups.Length; i++)
+        {
+            pickupPositions[i] = pickups[i].transform.position;
+        }
+        List<Vector3> unvisited = new List<Vector3>() { transform.position };
+        foreach (Vector3 pickupPosition in pickupPositions)
+        {
+            unvisited.Add(pickupPosition);
+        }
+
+        foreach (Vector3 node in unvisited)
+        {
+            Debug.Log(node);
+        }
+
+        //Assign node distances + set start node as current node
+        Vector3 current = unvisited[0];
+
+        Debug.Log(current);
+
+        List<float> distances = new List<float>();
+        foreach (Vector3 node in unvisited)
+        {
+            distances.Add(Vector3.Distance(current, node));
         }
     }
 }
