@@ -19,13 +19,12 @@ public class CPUController3 : MonoBehaviour
         count = 0;
 
         SetCountText();
-        MapShortestPickupPath();
     }
 
     void Update()
     {
-        speed = 1f;
-        //MapShortestPickupPath();
+        speed = 10f;
+        MapShortestPickupPath();
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -94,6 +93,7 @@ public class CPUController3 : MonoBehaviour
 
         //Assign node distances + set start node as current node
         Vector3 current = unvisited[0];
+        unvisited.RemoveAt(0);
 
         Debug.Log(current);
 
@@ -102,5 +102,25 @@ public class CPUController3 : MonoBehaviour
         {
             distances.Add(Vector3.Distance(current, node));
         }
+
+        //If distance between 2 nodes is smaller than previous distance, with initial distance being infinity, then distance should be smaller distance
+        float closestDistance = Mathf.Infinity;
+        GameObject closestPickup = null;
+        foreach (float distance in distances)
+        {
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                Debug.Log(closestDistance);
+            }
+        }
+        foreach (GameObject pickup in pickups)
+        {
+            if (Vector3.Distance(current, pickup.transform.position) == closestDistance)
+            {
+                closestPickup = pickup;
+            }
+        }
+        transform.position = Vector3.MoveTowards(transform.position, closestPickup.transform.position, speed * Time.deltaTime);
     }
 }
