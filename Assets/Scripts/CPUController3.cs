@@ -116,9 +116,11 @@ public class CPUController3 : MonoBehaviour
             {
                 closestPickup = pickup;
                 distance = Vector3.Distance(transform.position, closestPickup.transform.position);
+                totalDistance += distance;
                 visitedPickups.Add(closestPickup.transform.position);
                 unvisitedPickups.Remove(pickup);
             }
         }
+        //add list of total distances and choose shortest total distance to follow
     }
 }
