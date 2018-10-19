@@ -14,9 +14,11 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private int count;
     private int cpuCount;
+    private int totalPickups;
 
     void Start ()
     {
+        totalPickups = GameObject.FindGameObjectsWithTag("Pick-Up").Length;
         //reference to Rigidbody (physics component) on object
         rb = GetComponent<Rigidbody>();
 
@@ -64,7 +66,7 @@ public class PlayerController : MonoBehaviour
     void SetCountText ()
     {
         countText.text = "Player Count: " + count.ToString();
-        if (count + cpuCount == 12)
+        if (count + cpuCount == totalPickups)
         {
             if (count == cpuCount)
             {

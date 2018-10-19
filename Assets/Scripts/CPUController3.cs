@@ -14,6 +14,8 @@ public class CPUController3 : MonoBehaviour
 
     private int count;
 
+    GameObject closestPickup;
+
     void Start()
     {
         count = 0;
@@ -23,8 +25,14 @@ public class CPUController3 : MonoBehaviour
 
     void Update()
     {
-        speed = 10f;
-        MapShortestPickupPath();
+        closestPickup = null;
+        speed = 6f;
+        MSPP();
+        //MapShortestPickupPath();
+        if (closestPickup != null)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, closestPickup.transform.position, speed * Time.deltaTime);
+        }
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -52,27 +60,6 @@ public class CPUController3 : MonoBehaviour
 
     void MapShortestPickupPath()
     {
-        /*
-        List<GameObject> pickups = new List<GameObject>((GameObject[])GameObject.FindGameObjectsWithTag("Pick-Up"));
-        float distance = Mathf.Infinity;
-        float totalDistance = 0;
-        GameObject closestPickup = null;
-        List<GameObject> unvisitedPickups = pickups;
-
-        List<Vector3> visitedPickups = new List<Vector3>();
-        visitedPickups.Add(transform.position);
-        foreach (GameObject pickup in unvisitedPickups)
-        {
-            if (Vector3.Distance(transform.position, pickup.transform.position) < distance)
-            {
-                closestPickup = pickup;
-                distance = Vector3.Distance(transform.position, closestPickup.transform.position);
-                totalDistance += distance;
-                visitedPickups.Add(closestPickup.transform.position);
-            }
-        }
-        */
-
         //Mark all nodes unvisited + create unvisited set
         GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pick-Up");
         Vector3[] pickupPositions = new Vector3[pickups.Length];
@@ -86,16 +73,9 @@ public class CPUController3 : MonoBehaviour
             unvisited.Add(pickupPosition);
         }
 
-        foreach (Vector3 node in unvisited)
-        {
-            Debug.Log(node);
-        }
-
         //Assign node distances + set start node as current node
         Vector3 current = unvisited[0];
         unvisited.RemoveAt(0);
-
-        Debug.Log(current);
 
         List<float> distances = new List<float>();
         foreach (Vector3 node in unvisited)
@@ -105,13 +85,11 @@ public class CPUController3 : MonoBehaviour
 
         //If distance between 2 nodes is smaller than previous distance, with initial distance being infinity, then distance should be smaller distance
         float closestDistance = Mathf.Infinity;
-        GameObject closestPickup = null;
         foreach (float distance in distances)
         {
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                Debug.Log(closestDistance);
             }
         }
         foreach (GameObject pickup in pickups)
@@ -121,6 +99,26 @@ public class CPUController3 : MonoBehaviour
                 closestPickup = pickup;
             }
         }
-        transform.position = Vector3.MoveTowards(transform.position, closestPickup.transform.position, speed * Time.deltaTime);
+    }
+
+    void MSPP()
+    {    
+        List<GameObject> pickups = new List<GameObject>((GameObject[])GameObject.FindGameObjectsWithTag("Pick-Up"));
+        float distance = Mathf.Infinity;
+        float totalDistance = 0;
+        List<GameObject> unvisitedPickups = pickups;
+            
+        List<Vector3> visitedPickups = new List<Vector3>();
+        visitedPickups.Add(transform.position);
+        foreach (GameObject pickup in unvisitedPickups.ToArray())
+        {
+            if (Vector3.Distance(transform.position, pickup.transform.position) < distance)
+            {
+                closestPickup = pickup;
+                distance = Vector3.Distance(transform.position, closestPickup.transform.position);
+                visitedPickups.Add(closestPickup.transform.position);
+                unvisitedPickups.Remove(pickup);
+            }
+        }
     }
 }

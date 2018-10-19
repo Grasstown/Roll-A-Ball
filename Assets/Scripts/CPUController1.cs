@@ -18,14 +18,10 @@ public class CPUController1 : MonoBehaviour {
     {
         rb = GetComponent<Rigidbody>();
         count = 0;
+        speed = 6f;
 
         SetCountText();
         InvokeRepeating("MoveRandomDirection", 0f, 1f);
-    }
-
-    void Update()
-    {
-        speed = 5;
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other

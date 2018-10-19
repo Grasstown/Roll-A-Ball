@@ -23,7 +23,7 @@ public class CPUController2 : MonoBehaviour
 
     void Update()
     {
-        speed = 5;
+        speed = 6f;
         GameObject closest = FindClosestPickup();
         float xMax = speed * Time.deltaTime;
         if (FindClosestPickup() != null)
