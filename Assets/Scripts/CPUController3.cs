@@ -9,12 +9,45 @@ public class CPUController3 : MonoBehaviour
 
     //Method 3 - Use Dijkstra's Algorithm to map where pickups are and move to closest pickup
 
+    public class Node
+    {
+        public String name;
+        public Vector3 position;
+        public Node()
+        {
+            name = "";
+            position = Vector3.zero;
+        }
+
+        public Node(String nm, Vector3 pos)
+        {
+            name = nm;
+            position = pos;
+        }
+
+        public Node(Vector3 pos)
+        {
+            name = "";
+            position = pos;
+        }
+
+        public Node(String nm)
+        {
+            position = Vector3.zero;
+        }
+
+        public String toString()
+        {
+            return ("Name: " + name + "\nPosition" + position.ToString());
+        }
+    }
+
     private float speed;
     public Text countText;
 
     private int count;
 
-    GameObject closestPickup;
+    Node closestPickup;
 
     void Start()
     {
@@ -31,7 +64,7 @@ public class CPUController3 : MonoBehaviour
         //MapShortestPickupPath();
         if (closestPickup != null)
         {
-            transform.position = Vector3.MoveTowards(transform.position, closestPickup.transform.position, speed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, closestPickup.position, speed * Time.deltaTime);
         }
     }
 
@@ -58,7 +91,8 @@ public class CPUController3 : MonoBehaviour
         return count;
     }
 
-    void MapShortestPickupPath()
+    //this is a reference method
+  /*   void MapShortestPickupPath()
     {
         //Mark all nodes unvisited + create unvisited set
         GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pick-Up");
@@ -99,26 +133,35 @@ public class CPUController3 : MonoBehaviour
                 closestPickup = pickup;
             }
         }
-    }
+    } */
 
     void MSPP()
     {    
         List<GameObject> pickups = new List<GameObject>((GameObject[])GameObject.FindGameObjectsWithTag("Pick-Up"));
         float distance = Mathf.Infinity;
-        float totalDistance = 0;
-        List<GameObject> unvisitedPickups = pickups;
+        
+        List<Node> unvisitedPickups = new List<Node>();
             
-        List<Vector3> visitedPickups = new List<Vector3>();
-        visitedPickups.Add(transform.position);
-        foreach (GameObject pickup in unvisitedPickups.ToArray())
+        List<Node> visitedPickups = new List<Node>();
+
+        foreach (GameObject pickup in pickups)
         {
-            if (Vector3.Distance(transform.position, pickup.transform.position) < distance)
+            Vector3 pickupPosition = pickup.transform.position;
+            Node genericNode = new Node(pickup.name, pickupPosition);
+            unvisitedPickups.Add(genericNode);
+        }
+
+        List<Node> paths = new List<Node>();
+
+        foreach (Node pickup in unvisitedPickups.ToArray())
+        {
+            if (Vector3.Distance(transform.position, pickup.position) < distance)
             {
                 closestPickup = pickup;
-                distance = Vector3.Distance(transform.position, closestPickup.transform.position);
-                totalDistance += distance;
-                visitedPickups.Add(closestPickup.transform.position);
+                distance = Vector3.Distance(transform.position, closestPickup.position);
+                visitedPickups.Add(pickup);
                 unvisitedPickups.Remove(pickup);
+                paths.Add(pickup);
             }
         }
         //add list of total distances and choose shortest total distance to follow
