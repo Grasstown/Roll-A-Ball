@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         //get CPU Count
-        cpuCount = GameObject.Find("CPU").GetComponent<CPUController3>().GetCount();
+        cpuCount = GameObject.Find("CPU").GetComponent<CPUController2Alternate>().GetCount();
         SetCountText ();
     }
 
