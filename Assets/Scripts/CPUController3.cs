@@ -7,37 +7,103 @@ using UnityEngine.UI;
 public class CPUController3 : MonoBehaviour
 {
 
-    //Method 3 - Map all route and use TSP algorithm to find shortest path that goes through all nodes
-        public class Node
+    //Method 3 - Map all route and use TSP algorithm to find shortest path that goes through all Vertexs
+    public class Vertex
     {
         public String name;
+        public float keyValue;
         public Vector3 position;
-        public Node()
+        
+        public Vertex()
         {
             name = "";
-            position = Vector3.zero;
+            keyValue = Mathf.Infinity;
+            position = Vector3.positiveInfinity;
         }
 
-        public Node(String nm, Vector3 pos)
+        public Vertex(String nm, float kv, Vector3 pos)
+        {
+            name = nm;
+            keyValue = kv;
+            position = pos;
+        }
+
+        public Vertex(float kv)
+        {
+            name = "";
+            keyValue = kv;
+            position = Vector3.positiveInfinity;
+        }
+
+        public Vertex(String nm)
+        {
+            name = nm;
+            keyValue = Mathf.Infinity;
+            position = Vector3.positiveInfinity;
+        }
+
+        public Vertex(Vector3 pos)
+        {
+            name = "";
+            keyValue = Mathf.Infinity;
+            position = pos;
+        }
+
+        public Vertex(String nm, Vector3 pos)
         {
             name = nm;
             position = pos;
         }
 
-        public Node(Vector3 pos)
-        {
-            name = "";
-            position = pos;
-        }
-
-        public Node(String nm)
-        {
-            position = Vector3.zero;
-        }
-
         public String toString()
         {
-            return ("Name: " + name + "\nPosition" + position.ToString());
+            return ("Name: " + name + "\nKey Value" + keyValue + "\nposition: " + position.ToString());
+        }
+    }
+
+    public class Graph
+    {
+        List<Vertex> V;
+        List<float> E;
+
+        public Graph()
+        {
+        }
+
+        public Graph(List<Vertex> vertices, List<float> edges)
+        {
+            V = vertices;
+            E = edges;
+        }
+
+        public Graph(List<Vertex> vertices)
+        {
+            V = vertices;
+        }
+
+        public Graph(List<float> edges)
+        {
+            E = edges;
+        }
+
+        public List<Vertex> GetVertices()
+        {
+            return V;
+        }
+        
+        public List<float> GetEdges()
+        {
+            return E;
+        }
+
+        public void SetVertices(List<Vertex> vertices)
+        {
+            V = vertices;
+        }
+        
+        public void SetEdges(List<float> edges)
+        {
+            E = edges;
         }
     }
 
@@ -46,10 +112,11 @@ public class CPUController3 : MonoBehaviour
 
     private int count;
 
-    Node closestPickup;
+    public Vector3 initialPosition;
 
     void Start()
     {
+        initialPosition = transform.position;
         count = 0;
 
         SetCountText();
@@ -58,19 +125,6 @@ public class CPUController3 : MonoBehaviour
     void Update()
     {
         speed = 6f;
-        GameObject closest = FindClosestPickup();
-        float xMax = speed * Time.deltaTime;
-        if (FindClosestPickup() != null)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, closest.transform.position, xMax);
-        }
-        //Alternative
-        /* closestPickup = null;
-        MSPP();
-        if (closestPickup != null)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, closestPickup.position, speed * Time.deltaTime);
-        } */
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -91,63 +145,45 @@ public class CPUController3 : MonoBehaviour
         countText.text = "CPU Count: " + count.ToString();
     }
 
-    //finds position of closest object
-    public GameObject FindClosestPickup()
-    {
-        GameObject[] pickups;
-        pickups = GameObject.FindGameObjectsWithTag("Pick-Up");
-        GameObject closest = null;
-        float distance = Mathf.Infinity;
-        Vector3 position = transform.position;
-        foreach (GameObject pickup in pickups)
-        {
-            Vector3 diff = pickup.transform.position - position;
-            float curDistance = diff.sqrMagnitude;
-            if (curDistance < distance)
-            {
-                closest = pickup;
-                distance = curDistance;
-            }
-        }
-        return closest;
-    }
-
-    //Alternative Method using Dijkstra's Algorithm
-    void MSPP()
-    {    
-        List<GameObject> pickups = new List<GameObject>((GameObject[])GameObject.FindGameObjectsWithTag("Pick-Up"));
-        float distance = Mathf.Infinity;
-        
-        List<Node> unvisitedPickups = new List<Node>();
-            
-        List<Node> visitedPickups = new List<Node>();
-
-        foreach (GameObject pickup in pickups)
-        {
-            Vector3 pickupPosition = pickup.transform.position;
-            Node genericNode = new Node(pickup.name, pickupPosition);
-            unvisitedPickups.Add(genericNode);
-        }
-
-        List<Node> paths = new List<Node>();
-        float totaldistance = 0;
-
-        foreach (Node pickup in unvisitedPickups.ToArray())
-        {
-            if (Vector3.Distance(transform.position, pickup.position) < distance)
-            {
-                closestPickup = pickup;
-                distance = Vector3.Distance(transform.position, closestPickup.position);
-                visitedPickups.Add(pickup);
-                unvisitedPickups.Remove(pickup);
-                paths.Add(pickup);
-                totaldistance += distance;
-            }
-        }
-    }
-
     public int GetCount()
     {
         return count;
+    }
+
+    public List<Vertex> FindMST()
+    {
+        List<Vertex> vertices = new List<Vertex>();
+        List<float> edges = new List<float>();
+
+        //generate array of pickups, then add each pickup's name and position to vertex list
+        GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pick-Up");
+        vertices.Add(new Vertex(initialPosition));
+        foreach(GameObject pickup in pickups)
+        {
+            Vertex aVertex = new Vertex(pickup.name, pickup.transform.position);
+            vertices.Add(aVertex);
+        }
+
+        //calculate edges between vertices
+        for(int i=0; i < vertices.Count-1; i++)
+        {
+            float edge = Vector3.Distance(vertices[i].position, vertices[i+1].position);
+            edges.Add(edge);
+        }
+
+        //create graph of map
+        Graph PickupMap = new Graph(vertices, edges);
+
+        //assign root node as current transform
+        Vertex root = new Vertex(0);
+        foreach(Vertex vertex in vertices)
+        {
+            vertex.keyValue = Vector3.Distance(root.position, vertex.position);
+        }
+
+
+        List<Vertex> MSTSet = new List<Vertex>();
+        
+        return MSTSet;
     }
 }

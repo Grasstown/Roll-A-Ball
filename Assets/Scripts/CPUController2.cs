@@ -8,7 +8,7 @@ public class CPUController2 : MonoBehaviour
 {
 
     //Method 2 - Find closest Pick-Up and move to it
-        public class Node
+    public class Node
     {
         public String name;
         public Vector3 position;
@@ -32,6 +32,7 @@ public class CPUController2 : MonoBehaviour
 
         public Node(String nm)
         {
+            name = nm;
             position = Vector3.zero;
         }
 
@@ -90,6 +91,11 @@ public class CPUController2 : MonoBehaviour
     {
         countText.text = "CPU Count: " + count.ToString();
     }
+    
+    public int GetCount()
+    {
+        return count;
+    }
 
     //finds position of closest object
     public GameObject FindClosestPickup()
@@ -144,10 +150,5 @@ public class CPUController2 : MonoBehaviour
                 totaldistance += distance;
             }
         }
-    }
-
-    public int GetCount()
-    {
-        return count;
     }
 }
