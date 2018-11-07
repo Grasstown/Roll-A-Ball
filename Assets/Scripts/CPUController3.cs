@@ -53,7 +53,19 @@ public class CPUController3 : MonoBehaviour
         {
             name = nm;
             position = pos;
+            keyValue = Mathf.Infinity;
         }
+
+        public float GetKeyValue()
+        {
+            return keyValue;
+        }
+
+        public void SetKeyValue(float kv)
+        {
+            keyValue = kv;
+        }
+        
 
         public String toString()
         {
@@ -112,7 +124,7 @@ public class CPUController3 : MonoBehaviour
 
     private int count;
 
-    public Vector3 initialPosition;
+    private Vector3 initialPosition;
 
     void Start()
     {
@@ -125,6 +137,7 @@ public class CPUController3 : MonoBehaviour
     void Update()
     {
         speed = 6f;
+        FindMST();
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -164,25 +177,33 @@ public class CPUController3 : MonoBehaviour
             vertices.Add(aVertex);
         }
 
-        //calculate edges between vertices
-        for(int i=0; i < vertices.Count-1; i++)
-        {
-            float edge = Vector3.Distance(vertices[i].position, vertices[i+1].position);
-            edges.Add(edge);
-        }
-
         //create graph of map
         Graph PickupMap = new Graph(vertices, edges);
+        List<Vertex> pmVertices = PickupMap.GetVertices();
+        List<float> pmEdges = PickupMap.GetEdges();
 
-        //assign root node as current transform
-        Vertex root = new Vertex(0);
-        foreach(Vertex vertex in vertices)
-        {
-            vertex.keyValue = Vector3.Distance(root.position, vertex.position);
-        }
-
-
+        //create empty set MSTSet
         List<Vertex> MSTSet = new List<Vertex>();
+
+        //assign root node as current node and a key value of 0
+        Vertex root = pmVertices[0];
+        root.SetKeyValue(0);
+
+        if(MSTSet.Count != pmVertices.Count)
+        {
+            foreach(Vertex v in pmVertices)
+            {
+                v.keyValue = Vector3.Distance(root.position, v.position);
+
+                float lowestKeyValue = Mathf.Infinity;
+                if(v.GetKeyValue() < lowestKeyValue)
+                {
+                    lowestKeyValue = v.GetKeyValue();
+                    MSTSet.Add(v);
+                    root = v;
+                }
+            }
+        }
         
         return MSTSet;
     }
