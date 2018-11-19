@@ -65,7 +65,11 @@ public class CPUController3 : MonoBehaviour
         {
             keyValue = kv;
         }
-        
+
+        public Vector3 GetPosition()
+        {
+            return position;
+        }
 
         public String toString()
         {
@@ -126,18 +130,30 @@ public class CPUController3 : MonoBehaviour
 
     private Vector3 initialPosition;
 
+    private List<Vector3> shortestRoute;
+
     void Start()
     {
         initialPosition = transform.position;
         count = 0;
+        speed = 6f;
 
         SetCountText();
+        FindMST();
+
+        List<Vertex> points = FindMST();
+         for(int i = 0; i < points.Count; i++)
+        {
+            shortestRoute.Add(points[i].GetPosition());
+        }
+         for(int i = 0; i < shortestRoute.Count; i++)
+        {
+            Vector3.MoveTowards(transform.position, shortestRoute[i], speed * Time.deltaTime);
+        }
     }
 
     void Update()
     {
-        speed = 6f;
-        FindMST();
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -188,14 +204,15 @@ public class CPUController3 : MonoBehaviour
         //assign root node as current node and a key value of 0
         Vertex root = pmVertices[0];
         root.SetKeyValue(0);
+        float lowestKeyValue = Mathf.Infinity;
 
         if(MSTSet.Count != pmVertices.Count)
         {
-            foreach(Vertex v in pmVertices)
+            for (int i = 1; i < pmVertices.Count; i++)
             {
+                Vertex v = pmVertices[i];
                 v.keyValue = Vector3.Distance(root.position, v.position);
 
-                float lowestKeyValue = Mathf.Infinity;
                 if(v.GetKeyValue() < lowestKeyValue)
                 {
                     lowestKeyValue = v.GetKeyValue();
