@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -139,21 +140,15 @@ public class CPUController3 : MonoBehaviour
         speed = 6f;
 
         SetCountText();
-        FindMST();
-
-        List<Vertex> points = FindMST();
-         for(int i = 0; i < points.Count; i++)
-        {
-            shortestRoute.Add(points[i].GetPosition());
-        }
-         for(int i = 0; i < shortestRoute.Count; i++)
-        {
-            Vector3.MoveTowards(transform.position, shortestRoute[i], speed * Time.deltaTime);
-        }
     }
 
     void Update()
     {
+        List<Vertex> points = FindMST();
+        foreach(Vertex point in points)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, point.position, speed * Time.deltaTime);
+        }
     }
 
     //sends message to rigidbodies of objects everytime they collide with each other
@@ -201,10 +196,14 @@ public class CPUController3 : MonoBehaviour
         //create empty set MSTSet
         List<Vertex> MSTSet = new List<Vertex>();
 
-        //assign root node as current node and a key value of 0
+        //assign root node as current node and key values for other vertices as distance from root
         Vertex root = pmVertices[0];
-        root.SetKeyValue(0);
         float lowestKeyValue = Mathf.Infinity;
+        
+        foreach(Vertex v in pmVertices)
+        {
+            v.keyValue = Vector3.Distance(root.position, v.position);
+        }
 
         if(MSTSet.Count != pmVertices.Count)
         {
@@ -222,6 +221,7 @@ public class CPUController3 : MonoBehaviour
             }
         }
         
-        return MSTSet;
+        //sort vertices by key values
+        return MSTSet.OrderBy(x => x.keyValue).ToList();
     }
 }
