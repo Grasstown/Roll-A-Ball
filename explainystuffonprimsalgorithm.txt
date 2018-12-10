@@ -1,0 +1,54 @@
+Graph: consists of vertices (nodes) and edges that are connected to each other
+
+Minimum Spanning Tree(MST): spanning tree of a graph where the sum of the weight of all the edges is minimized
+
+U -> Z: edge between U and Z
+
+G(V, E): Graph G, where V is the set of vertices and E is the set of edges (connections between vertices)
+	V can be written as V(G), E can be written as E(G)
+
+hamiltonian cycle: vists each node exactly once and is a graph
+
+preorder tree walk: start at topmost parent
+		    	go through subtrees from left to right
+
+prim's algorithm:
+1) create a set (MSTSet) that keeps track of all vertices already in the MST. initially there are 0 vertices
+
+2) assign a key value to all vertices EXCEPT the initial vertex to infinity. Initial vertex is 0 (picked first)
+
+3) while MSTSet doesn't have all vertices
+	a) pick a vertex (X) that is not in MSTSet and has the lowest key value. (multiple vertices can have lowest key value)
+	b) add X to MSTSet
+	c) update key values of vertices adjacent to X
+		1. go through all adjacent vertices of X
+		2. each singular adjacent vertex of X will be U
+		3. if X -> U weight is less than current key value of U:
+			update current key value of U to X -> U weight
+
+Using Prim's for Traveling Salesman Problem:
+1. compute total weights for graph G
+2. assign vertex as root
+3. fill MST set T with below:
+   for each vertex U in vertices of graph:
+
+	each key value of U is defined such that:
+		parent of U's key value is null or infinity
+
+	root key value is 0
+
+	make a priority queue Q of all vertices that aren't in the tree already
+
+	while Q is not empty:
+		U is the vertex with the minimum key value
+			for each vertex V adjacent to U:
+				if (V is in Q) and (the weight of U -> V is less than the current key value of V):
+					key value of parent of V is U
+						key value of V is the weight of U -> V
+
+3. make a list L of vertices visited in a preorder tree walk of T
+4. return hamiltonian cycle H that visits vertices in order L
+
+Roll-A-Ball:
+
+* disregard steps 3 & 4 as they are not required for use-case
